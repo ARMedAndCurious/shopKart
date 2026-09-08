@@ -1,8 +1,10 @@
-import express from 'express'
 import dotenv from 'dotenv'
+dotenv.config()
+import express from 'express'
 import mongoose from 'mongoose'
 import dns from 'node:dns'
 import userRoutes from './routes/user.routes.js'
+import cookieParser from 'cookie-parser'
 
 dns.setServers([
   '8.8.8.8',
@@ -15,7 +17,7 @@ dns.setServers([
 const app = express()
 const Port = 8086
 
-dotenv.config()
+
 
 mongoose.connect(process.env.dbUrl).then(()=>{
     console.log("Db connected")
@@ -24,6 +26,7 @@ mongoose.connect(process.env.dbUrl).then(()=>{
 })
 
 app.use(express.json())
+app.use(cookieParser())
 app.use('/users', userRoutes)
 
 app.listen(Port,()=>{

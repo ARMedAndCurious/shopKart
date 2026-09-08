@@ -1,12 +1,17 @@
 import User from "../modles/user.modle.js";
 import bcrypt from 'bcrypt'
+import genToken from "../utils/generateToken.js";
+
+const cookieOptions ={
+    httpOnly:true
+}
 
 export const registerUser = async (req,res)=>{
     try {
 
         const {fullname,email,password,phone} = req.body
 
-        if(!name || !email || !password || !phone){
+        if(!fullname || !email || !password || !phone){
             res.status(400).json({message:'All the fields are required'})
         }
 
@@ -22,16 +27,57 @@ export const registerUser = async (req,res)=>{
 
         const hashedPassword =await bcrypt.hash(password,10)
 
-        const newUser = User.create({
+        const newUser = await User.create({
             fullname,
             email,
             phone,
             password:hashedPassword
         })
+        
+        const token = genToken(newUser._id)
+        res.cookie('token', token, cookieOptions)
+        console.log(process.env.jwt_secret)
+        return res.status(200).json({message:'User Registered', user:newUser})
 
-        return res.status(200).json({message:'User Registered', user:'newUser'})
         
     } catch (error) {
         return res.status(500).json({message:'Server crashed', error: error.message})
     }
+}
+
+export const loginUser = async(req,res)=>{
+
+    try {
+        
+        const{email, password} = req.body
+    
+        
+    
+        if(!email || !password){
+            res.status(400).json({message:'All the fields are required'})
+        }
+    
+        const user = await User.findOne({email});
+    
+        if(!user){
+             return res.status(404).json({message:'User not found'})
+        }
+
+        const passwordMatched = await bcrypt.compare(password, user.password) 
+
+        if(!passwordMatched){
+            return res.status(401).json({message: 'Password did not match'})
+        }
+        res.status(200).json({message: 'User logged in'})
+    } catch (error) {
+         res.status(500).json({message:'Server crashed', error: error.message})
+    
+    }
+
+}
+
+export const getMe = (req, res)=>{
+
+    const authenticatedUser = req.user
+     res.status(200).json({authenticatedUser}) 
 }
