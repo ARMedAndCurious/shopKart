@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { axiosInstance } from '../axiosCalls/axios';
+import { useAuth } from '../Context/authContext';
 
 const Login = ({ onSwitchToSignUp, onForgotPassword }) => {
   const navigate = useNavigate();
@@ -15,6 +16,7 @@ const Login = ({ onSwitchToSignUp, onForgotPassword }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [loader, setLoader] = useState(false)
   const [err, setErr] = useState(null)
+  const{setUser} = useAuth()
 
   const validateField = (name, value) => {
     let error = '';
@@ -66,9 +68,13 @@ const Login = ({ onSwitchToSignUp, onForgotPassword }) => {
       })
 
       console.log(res)
+      if (setUser) {
+        setUser(res.data.user || res.data);
+      }
       setLoader(false)
+
       // navigate to home after successful login
-      navigate('/')
+      navigate('/home')
 
     } catch (error) {
       setLoader(false)

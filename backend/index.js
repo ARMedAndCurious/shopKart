@@ -6,6 +6,7 @@ import dns from 'node:dns'
 import userRoutes from './routes/user.routes.js'
 import cookieParser from 'cookie-parser'
 import cors from 'cors'
+import productRoutes  from './routes/product.routes.js'
 
 dns.setServers([
   '8.8.8.8',
@@ -26,6 +27,7 @@ mongoose.connect(process.env.dbUrl).then(()=>{
     console.log(err)
 })
 
+
 app.use(cors(
     {
         origin:"http://localhost:5173",
@@ -33,10 +35,11 @@ app.use(cors(
         methods:['GET','POST', 'PUT','DELETE']
     }
 ))
-
 app.use(express.json())
 app.use(cookieParser())
-app.use('/users', userRoutes)
+app.use('/users', userRoutes);
+app.use('/products', productRoutes);
+
 
 app.listen(Port,()=>{
     console.log(`Server Started at ${Port}`)

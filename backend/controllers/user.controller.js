@@ -3,7 +3,9 @@ import bcrypt from 'bcrypt'
 import genToken from "../utils/generateToken.js";
 
 const cookieOptions = {
-    httpOnly: true
+    httpOnly: true,
+    secure: false,
+    sameSite: "lax"
 }
 
 export const registerUser = async (req, res) => {
@@ -90,7 +92,7 @@ export const getMe = (req, res) => {
 }
 
 export const logoutUser = (req,res)=>{
-    res.clearCookies("token", cookieOptions)
+    res.clearCookie("token", cookieOptions)
 
     return res.status(200).json({
         "success": true,
