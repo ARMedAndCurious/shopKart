@@ -1,24 +1,16 @@
 // src/Components/Navbar.jsx
-import { useContext } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
-import { useAuth } from '../Context/authContext';
-import { axiosInstance } from '../axiosCalls/axios';
+import { useAuth } from '../Context/authContext.jsx';
+import { useCart } from '../Context/cartContext.jsx';
 
 const Navbar = () => {
   const navigate = useNavigate();
-  const { user, setUser } = useAuth() || {};
+  const { user, logout } = useAuth();
+  const { cartCount } = useCart();
 
   const handleLogout = async () => {
-    try {
-      await axiosInstance.post('/users/logout');
-    } catch (err) {
-      console.error('Logout error:', err);
-    } finally {
-      if (setUser) {
-        setUser(null);
-      }
-      navigate('/login');
-    }
+    await logout();
+    navigate('/login');
   };
 
   return (
@@ -28,18 +20,7 @@ const Navbar = () => {
           shopKart<span className="text-gray-900">.</span>
         </Link>
 
-        <nav className="flex items-center gap-5">
-          <NavLink
-            to="/"
-            className={({ isActive }) =>
-              `text-sm font-medium transition ${
-                isActive ? 'text-indigo-600 font-semibold' : 'text-gray-600 hover:text-gray-900'
-              }`
-            }
-          >
-            Home
-          </NavLink>
-
+        <nav className="flex items-center gap-6">
           <NavLink
             to="/products"
             className={({ isActive }) =>
@@ -51,9 +32,35 @@ const Navbar = () => {
             Products
           </NavLink>
 
-          {/* Authenticated-only navigation items */}
           {user ? (
             <>
+              <NavLink
+                to="/wishlist"
+                className={({ isActive }) =>
+                  `text-sm font-medium transition ${
+                    isActive ? 'text-indigo-600 font-semibold' : 'text-gray-600 hover:text-gray-900'
+                  }`
+                }
+              >
+                Wishlist
+              </NavLink>
+
+              <NavLink
+                to="/cart"
+                className={({ isActive }) =>
+                  `text-sm font-medium transition flex items-center gap-1.5 ${
+                    isActive ? 'text-indigo-600 font-semibold' : 'text-gray-600 hover:text-gray-900'
+                  }`
+                }
+              >
+                Cart
+                {cartCount > 0 && (
+                  <span className="bg-indigo-600 text-white text-xs font-bold px-2 py-0.5 rounded-full">
+                    {cartCount}
+                  </span>
+                )}
+              </NavLink>
+
               <NavLink
                 to="/create-product"
                 className="text-sm font-medium bg-gray-900 text-white px-3.5 py-1.5 rounded-lg hover:bg-indigo-600 transition"
@@ -61,10 +68,17 @@ const Navbar = () => {
                 + Add Product
               </NavLink>
 
+              <NavLink
+                to="/orders"
+                className="text-sm font-medium text-gray-600 hover:text-gray-900 transition"
+              >
+                My Orders
+              </NavLink>
+
               <button
                 type="button"
                 onClick={handleLogout}
-                className="text-sm font-medium text-red-600 hover:text-red-700 bg-red-50 hover:bg-red-100 border border-red-200 px-3 py-1.5 rounded-lg transition"
+                className="text-sm font-medium text-red-600 hover:text-red-700 bg-red-50 hover:bg-red-100 border border-red-200 px-3 py-1.5 rounded-lg transition cursor-pointer"
               >
                 Logout
               </button>
@@ -76,6 +90,7 @@ const Navbar = () => {
             >
               Login
             </NavLink>
+            
           )}
         </nav>
       </div>

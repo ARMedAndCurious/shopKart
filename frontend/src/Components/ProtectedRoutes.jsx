@@ -1,13 +1,18 @@
-import React from "react";
-import { useAuth } from "../Context/authContext.jsx";
+// src/Components/ProtectedRoutes.jsx
 import { Navigate } from "react-router-dom";
+import { useAuth } from "../Context/authContext";
 
 export default function ProtectedRoutes({ children }) {
-    const { user } = useAuth();
+  const { user, loading } = useAuth();
 
-    if(!user){
-        return <Navigate to='/login'/>
-    }
+  // MUST wait for initial session check
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center min-h-[50vh] text-gray-500 font-medium">
+        Verifying session...
+      </div>
+    );
+  }
 
-    return children;
+  return user ? children : <Navigate to="/login" replace />;
 }

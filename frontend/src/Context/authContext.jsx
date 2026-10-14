@@ -1,10 +1,11 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { axiosInstance } from "../axiosCalls/axios";
 
-const AuthContext = createContext(null);
+export const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
+    const [loading, setLoading] = useState(true); // Prevents premature protected-route redirects
 
     const fetchUser = async () => {
         try {
@@ -12,6 +13,18 @@ export const AuthProvider = ({ children }) => {
             setUser(userData.data.authenticatedUser || null);
         } catch (error) {
             console.error("Failed to fetch user:", error);
+            setUser(null);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const logout = async () => {
+        try {
+            await axiosInstance.post("/users/logout");
+        } catch (error) {
+            console.error("Logout request failed:", error);
+        } finally {
             setUser(null);
         }
     };
@@ -21,7 +34,7 @@ export const AuthProvider = ({ children }) => {
     }, []);
 
     return (
-        <AuthContext.Provider value={{ user, setUser, fetchUser }}>
+        <AuthContext.Provider value={{ user, setUser, loading, fetchUser, logout }}>
             {children}
         </AuthContext.Provider>
     );
